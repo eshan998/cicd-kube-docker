@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-db
+  labels:
+    app: app-db
+spec:
+  selector:
+    matchLabels:
+      app: app-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app-db
+    spec:
+      containers:
+        - name: app-db
+          image: eshan3312/vprodb:v8
+          ports:
+            - name: db-port
+              containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: db-pass
+          volumeMounts:
+            - name: db-volume
+              mountPath: var/lib/mysql
+      volumes:
+        - name: db-volume
+          awsElasticBlockStore:
+            volumeID: vol-0b1bf24030afca118
+            fsType: ext4
+      nodeSelector:
+        zone: ap-south-1a
